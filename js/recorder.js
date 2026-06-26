@@ -182,7 +182,10 @@ class Recorder {
   }
 
   // ── Events ────────────────────────────────────────────
-  on(event, fn)  { (this._listeners[event] = this._listeners[event] || []).push(fn); return this; }
+  on(event, fn)  {
+    (this._listeners[event] = this._listeners[event] || []).push(fn);
+    return () => this.off(event, fn);
+  }
   off(event, fn) { this._listeners[event] = (this._listeners[event] || []).filter(l => l !== fn); }
   _emit(event, data) { (this._listeners[event] || []).forEach(fn => fn(data)); }
 }
