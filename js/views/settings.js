@@ -44,7 +44,7 @@ class SettingsModal {
             
             <div style="display:flex; flex-direction:column; gap:var(--space-1);">
               <label for="settingsServerURL" style="font-size:var(--text-xs); color:var(--text-secondary);">Server URL</label>
-              <input type="text" id="settingsServerURL" class="input-field" style="font-family:var(--font-mono); font-size:var(--text-sm);" placeholder="http://localhost:8080" />
+              <input type="text" id="settingsServerURL" class="input-field" style="font-family:var(--font-mono); font-size:var(--text-sm);" placeholder="https://noted.thinkdiff.us" />
             </div>
 
             <button class="btn btn--primary" id="settingsTestBtn" style="font-size:var(--text-sm); font-weight:var(--weight-medium); width:100%; border-radius:var(--radius-md); padding:var(--space-2) var(--space-4);">
@@ -211,7 +211,7 @@ class SettingsModal {
   }
 
   _loadSettings() {
-    const serverURL = storage.getSetting('server_url', 'http://localhost:8080');
+    const serverURL = storage.getSetting('server_url', 'https://noted.thinkdiff.us');
     const apiKey = storage.getSetting('api_key', '');
     const language = storage.getSetting('language', 'auto');
     const recsCount = storage.recordings.length;

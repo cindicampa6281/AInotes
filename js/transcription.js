@@ -3,7 +3,7 @@
  * Mirrors iOS TranscriptionService.swift (Whisper.cpp HTTP server)
  */
 class TranscriptionService {
-  get serverURL() { return storage.getSetting('server_url', 'http://localhost:8080'); }
+  get serverURL() { return storage.getSetting('server_url', 'https://noted.thinkdiff.us'); }
   get language()  { return storage.getSetting('language', 'auto'); }
 
   // ── Transcribe audio blob via Whisper.cpp server ──────
