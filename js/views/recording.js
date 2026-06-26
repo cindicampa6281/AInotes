@@ -331,10 +331,10 @@ class RecordingModal {
   }
 
   _cleanup() {
-    this._recUnsubTick?.();
-    this._recUnsubLevels?.();
-    this._recUnsubDone?.();
-    this._recUnsubError?.();
+    if (typeof this._recUnsubTick === 'function') this._recUnsubTick();
+    if (typeof this._recUnsubLevels === 'function') this._recUnsubLevels();
+    if (typeof this._recUnsubDone === 'function') this._recUnsubDone();
+    if (typeof this._recUnsubError === 'function') this._recUnsubError();
     this._recUnsubTick = this._recUnsubLevels = this._recUnsubDone = this._recUnsubError = null;
   }
 }
