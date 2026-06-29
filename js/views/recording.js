@@ -256,7 +256,7 @@ class RecordingModal {
     storage.updateRecording(recording);
 
     try {
-      const result = await transcriptionService.transcribe(blob, recording.language);
+      const result = await transcriptionService.transcribe(blob, recording.language, recording.id);
 
       recording.transcriptSegments = result.segments;
       recording.fullTranscript     = result.fullText;

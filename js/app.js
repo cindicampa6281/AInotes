@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const detailView     = new DetailView(detailContainer);
   const recordingModal = new RecordingModal();
   const settingsModal  = new SettingsModal();
+  const authModal      = new AuthModal();
 
   // ── Global Event Bus Routing ─────────────────────────
 
@@ -49,6 +50,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3. Open Settings Modal
   EventBus.on('openSettings', () => {
     settingsModal.open();
+  });
+
+  // 3b. Open Account Modal
+  EventBus.on('openAccount', () => {
+    authModal.open();
   });
 
   // 4. Open Recorder Modal

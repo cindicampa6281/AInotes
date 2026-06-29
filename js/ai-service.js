@@ -14,86 +14,46 @@ class AIService {
   // ── Generate Summary ──────────────────────────────────
   async generateSummary(transcript, language = null) {
     const lang = language || this.language;
-    const systemPrompt = 'Bạn là trợ lý AI chuyên phân tích và tóm tắt nội dung ghi âm, cuộc họp. Hãy trả về JSON theo đúng format được yêu cầu.';
-    const userPrompt = this._buildSummaryPrompt(transcript, lang);
+    const token = storage.getToken();
 
-    if (!this.apiKey) {
-      // Use Pollinations AI (free, no key)
-      try {
-        const text = await this._callPollinations(userPrompt, systemPrompt);
-        return this._parseSummaryFromText(text, transcript);
-      } catch (e) {
-        console.warn('Pollinations AI failed, using mock:', e);
-        return this._mockSummary(transcript, lang);
-      }
-    }
-
-    // Use OpenAI
-    const body = {
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.3,
-    };
-
-    const resp = await fetch(this.openAIEndpoint, {
+    const resp = await fetch(`${storage.API_BASE_URL}/api/ai/summarize`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
         'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ transcript, language: lang })
     });
 
-    if (!resp.ok) throw new Error(`OpenAI error: ${resp.status}`);
-    const json = await resp.json();
-    const content = json.choices?.[0]?.message?.content || '{}';
-    const summaryData = JSON.parse(content);
+    if (!resp.ok) {
+      const errData = await resp.json().catch(() => ({}));
+      throw new Error(errData.error || `Summary API error: ${resp.status}`);
+    }
+
+    const summaryData = await resp.json();
     return new AISummary({ ...summaryData, generatedAt: new Date() });
   }
 
   // ── Chat with Transcript ──────────────────────────────
   async chatWithTranscript(transcript, question) {
-    const lang = this.language;
-    const systemPrompt = lang === 'en'
-      ? 'You are an AI assistant analyzing audio recording transcripts. Answer the user\'s questions based on the provided transcript. Be direct and natural in English.'
-      : 'Bạn là trợ lý phân tích nội dung ghi âm. Hãy trả lời câu hỏi dựa trên nội dung transcript được cung cấp. Hãy trả lời trực tiếp và tự nhiên bằng tiếng Việt.';
+    const token = storage.getToken();
 
-    const userMessage = `Transcript:\n${transcript}\n\nCâu hỏi: ${question}`;
-
-    if (!this.apiKey) {
-      try {
-        return await this._callPollinations(userMessage, systemPrompt);
-      } catch (e) {
-        console.warn('Pollinations AI chat failed, using mock:', e);
-        return this._mockChatResponse(transcript, question, lang);
-      }
-    }
-
-    const body = {
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userMessage },
-      ],
-      temperature: 0.5,
-    };
-
-    const resp = await fetch(this.openAIEndpoint, {
+    const resp = await fetch(`${storage.API_BASE_URL}/api/ai/chat`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
         'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ transcript, question })
     });
 
-    if (!resp.ok) throw new Error(`OpenAI error: ${resp.status}`);
-    const json = await resp.json();
-    return json.choices?.[0]?.message?.content || '';
+    if (!resp.ok) {
+      const errData = await resp.json().catch(() => ({}));
+      throw new Error(errData.error || `Chat API error: ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    return data.answer;
   }
 
   // ── Private: Pollinations AI ──────────────────────────

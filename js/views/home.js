@@ -20,12 +20,15 @@ class HomeView {
           <div class="home-header__app-name gradient-text">AiNotes</div>
           <div class="home-header__tagline">AI Voice Notes</div>
         </div>
-        <div class="home-header__actions">
+        <div class="home-header__actions" style="display:flex; align-items:center; gap:var(--space-2)">
           <button class="btn--icon" id="importBtn" title="Nhập file audio" aria-label="Nhập file audio">
             ${icon('import', 18).outerHTML}
           </button>
           <button class="btn--icon" id="settingsBtn" title="Cài đặt" aria-label="Cài đặt">
             ${icon('settings', 18).outerHTML}
+          </button>
+          <button class="auth-avatar-mini-btn" id="accountBtn" title="Tài khoản" aria-label="Tài khoản">
+            U
           </button>
         </div>
       </header>
@@ -57,6 +60,7 @@ class HomeView {
       <input type="file" id="audioFileInput" accept="audio/*" class="sr-only" />
     `;
 
+    this._updateAccountUI();
     this._renderStats();
     this._renderList();
   }
@@ -105,6 +109,34 @@ class HomeView {
       if (file) this._importAudioFile(file);
       e.target.value = ''; // reset
     });
+
+    // Account button
+    $('#accountBtn', this.container).addEventListener('click', () => {
+      EventBus.emit('openAccount');
+    });
+
+    EventBus.on('accountUpdated', () => {
+      this._updateAccountUI();
+    });
+  }
+
+  _updateAccountUI() {
+    const btn = $('#accountBtn', this.container);
+    if (!btn) return;
+
+    const user = storage.getUser();
+    if (user) {
+      if (user.avatar_url) {
+        btn.style.backgroundImage = `url(${user.avatar_url})`;
+        btn.textContent = '';
+      } else {
+        btn.style.backgroundImage = '';
+        btn.textContent = (user.name || user.username || 'U').charAt(0).toUpperCase();
+      }
+    } else {
+      btn.style.backgroundImage = '';
+      btn.textContent = 'U';
+    }
   }
 
   _renderStats() {
