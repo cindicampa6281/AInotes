@@ -11,7 +11,7 @@ class SettingsModal {
 
   _build() {
     this._modal = el('div', { class: 'modal modal--center', id: 'settingsModal', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Cài đặt' });
-    
+
     this._modal.innerHTML = `
       <div class="modal__content" style="border-radius:var(--radius-2xl); width:90%; max-width:550px; max-height:85vh; display:flex; flex-direction:column; background: linear-gradient(180deg, #1e1e2f 0%, #121220 100%);">
         
@@ -44,7 +44,7 @@ class SettingsModal {
             
             <div style="display:flex; flex-direction:column; gap:var(--space-1);">
               <label for="settingsServerURL" style="font-size:var(--text-xs); color:var(--text-secondary);">Server URL</label>
-              <input type="text" id="settingsServerURL" class="input-field" style="font-family:var(--font-mono); font-size:var(--text-sm);" placeholder="https://noted.thinkdiff.us" />
+              <input type="text" id="settingsServerURL" class="input-field" style="font-family:var(--font-mono); font-size:var(--text-sm);" placeholder="https://ainotes.thinkdiff.us" />
             </div>
 
             <button class="btn btn--primary" id="settingsTestBtn" style="font-size:var(--text-sm); font-weight:var(--weight-medium); width:100%; border-radius:var(--radius-md); padding:var(--space-2) var(--space-4);">
@@ -148,7 +148,7 @@ class SettingsModal {
 
   _bindEvents() {
     this._modal.querySelector('#smDoneBtn').addEventListener('click', () => this.close());
-    
+
     // Save settings when user inputs
     const serverUrlInput = this._modal.querySelector('#settingsServerURL');
     const apiKeyInput = this._modal.querySelector('#settingsAPIKey');
@@ -211,7 +211,7 @@ class SettingsModal {
   }
 
   _loadSettings() {
-    const serverURL = storage.getSetting('server_url', 'https://noted.thinkdiff.us');
+    const serverURL = storage.getSetting('server_url', 'https://ainotes.thinkdiff.us');
     const apiKey = storage.getSetting('api_key', '');
     const language = storage.getSetting('language', 'auto');
     const recsCount = storage.recordings.length;
@@ -223,7 +223,7 @@ class SettingsModal {
     this._modal.querySelector('#settingsTotalRecords').textContent = `${recsCount} bản ghi`;
 
     this._updateLangUI(language);
-    
+
     // Hide test results
     const resultEl = this._modal.querySelector('#settingsTestResult');
     resultEl.classList.add('hidden');
@@ -241,7 +241,7 @@ class SettingsModal {
 
   async _testConnection() {
     if (this._isTesting) return;
-    
+
     const serverUrlInput = this._modal.querySelector('#settingsServerURL');
     const serverURL = serverUrlInput.value.trim();
 
@@ -254,20 +254,20 @@ class SettingsModal {
     const testBtn = this._modal.querySelector('#settingsTestBtn');
     testBtn.disabled = true;
     testBtn.innerHTML = `<span>Đang kiểm tra...</span>`;
-    
+
     this._showTestResult('Đang kiểm tra kết nối...', 'info');
 
     try {
       // Create request controller with timeout
       const controller = new AbortController();
       const id = setTimeout(() => controller.abort(), 4000);
-      
-      const resp = await fetch(`${serverURL}/`, { 
+
+      const resp = await fetch(`${serverURL}/`, {
         method: 'GET',
         signal: controller.signal,
         mode: 'no-cors' // Bypass CORS since it is local/IP server
       });
-      
+
       clearTimeout(id);
       this._showTestResult('✓ Kết nối thành công', 'success');
     } catch (e) {
