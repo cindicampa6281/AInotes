@@ -20,7 +20,14 @@
 
   <!-- Main Application Wrapper -->
   <div id="app">
-    <div class="app-layout">
+
+    <!-- Auth Screen (shown when NOT logged in) -->
+    <div class="auth-screen" id="authScreen">
+      <!-- Rendered dynamically by AuthPage -->
+    </div>
+
+    <!-- App Layout (shown when logged in) -->
+    <div class="app-layout hidden" id="appLayout">
       
       <!-- Sidebar Panel (Home list, stats, search, fab) -->
       <aside class="sidebar" id="sidebarContainer">
@@ -36,24 +43,24 @@
   </div>
 
   <!-- JavaScript Services & Utilities -->
-  <script src="js/utils.js?v=4"></script>
-  <script src="js/models.js?v=4"></script>
-  <script src="js/storage.js?v=4"></script>
-  <script src="js/audio-service.js?v=4"></script>
-  <script src="js/recorder.js?v=4"></script>
-  <script src="js/transcription.js?v=4"></script>
-  <script src="js/ai-service.js?v=4"></script>
+  <script src="js/utils.js?v=5"></script>
+  <script src="js/models.js?v=5"></script>
+  <script src="js/storage.js?v=5"></script>
+  <script src="js/audio-service.js?v=5"></script>
+  <script src="js/recorder.js?v=5"></script>
+  <script src="js/transcription.js?v=5"></script>
+  <script src="js/ai-service.js?v=5"></script>
 
   <!-- JavaScript Views -->
-  <script src="js/views/tabs.js?v=4"></script>
-  <script src="js/views/recording.js?v=4"></script>
-  <script src="js/views/detail.js?v=4"></script>
-  <script src="js/views/settings.js?v=4"></script>
-  <script src="js/views/home.js?v=4"></script>
-  <script src="js/views/auth.js?v=4"></script>
+  <script src="js/views/tabs.js?v=5"></script>
+  <script src="js/views/recording.js?v=5"></script>
+  <script src="js/views/detail.js?v=5"></script>
+  <script src="js/views/settings.js?v=5"></script>
+  <script src="js/views/home.js?v=5"></script>
+  <script src="js/views/auth.js?v=5"></script>
 
   <!-- JavaScript Main App Controller -->
-  <script src="js/app.js?v=4"></script>
+  <script src="js/app.js?v=5"></script>
 
 </body>
 </html>

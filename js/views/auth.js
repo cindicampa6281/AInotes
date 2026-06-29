@@ -1,11 +1,283 @@
 /**
- * NoteD Web — Auth & Profile Modal
- * Handles user login, registration, and profile display/edit
+ * NoteD Web — Auth Page & Profile Modal
+ * Full-screen auth gate + profile management for logged-in users
  */
+
+// ── Full-Screen Auth Page (Login / Register) ──────────────
+class AuthPage {
+  constructor(container) {
+    this.container = container;
+    this._activeTab = 'login';
+    this.render();
+  }
+
+  render() {
+    const isLogin = this._activeTab === 'login';
+
+    this.container.innerHTML = `
+      <div class="auth-page">
+        <!-- Animated background -->
+        <div class="auth-page__bg">
+          <div class="auth-page__orb auth-page__orb--1"></div>
+          <div class="auth-page__orb auth-page__orb--2"></div>
+          <div class="auth-page__orb auth-page__orb--3"></div>
+        </div>
+
+        <div class="auth-page__content">
+          <!-- Logo -->
+          <div class="auth-page__logo animate-fade-in">
+            <div class="auth-page__logo-icon">
+              <span class="auth-page__logo-glow"></span>
+              ${icon('waveform', 36).outerHTML}
+            </div>
+            <h1 class="auth-page__title gradient-text">AiNotes</h1>
+            <p class="auth-page__subtitle">Ghi âm & Phiên âm AI thông minh</p>
+          </div>
+
+          <!-- Auth Card -->
+          <div class="auth-card animate-fade-in" style="animation-delay: 0.15s">
+            <!-- Tab Switcher -->
+            <div class="auth-card__tabs">
+              <button class="auth-card__tab ${isLogin ? 'active' : ''}" id="authTabLogin">
+                <span class="auth-card__tab-icon">🔑</span>
+                Đăng nhập
+              </button>
+              <button class="auth-card__tab ${!isLogin ? 'active' : ''}" id="authTabRegister">
+                <span class="auth-card__tab-icon">✨</span>
+                Đăng ký
+              </button>
+              <div class="auth-card__tab-indicator" style="transform: translateX(${isLogin ? '0%' : '100%'})"></div>
+            </div>
+
+            <!-- Error message -->
+            <div id="authPageError" class="auth-card__error hidden"></div>
+
+            <!-- Form -->
+            <div class="auth-card__form" id="authPageForm">
+              ${isLogin ? this._getLoginHTML() : this._getRegisterHTML()}
+            </div>
+
+            <!-- Submit button -->
+            <button class="auth-card__submit" id="authPageSubmit">
+              <span class="auth-card__submit-text">${isLogin ? 'Đăng nhập' : 'Tạo tài khoản'}</span>
+              <span class="auth-card__submit-icon">→</span>
+            </button>
+
+            <!-- Footer -->
+            <div class="auth-card__footer">
+              ${isLogin 
+                ? 'Chưa có tài khoản? <button class="auth-card__link" id="authSwitchToRegister">Đăng ký ngay</button>'
+                : 'Đã có tài khoản? <button class="auth-card__link" id="authSwitchToLogin">Đăng nhập</button>'
+              }
+            </div>
+          </div>
+
+          <!-- Features preview -->
+          <div class="auth-page__features animate-fade-in" style="animation-delay: 0.3s">
+            <div class="auth-page__feature">
+              <span class="auth-page__feature-icon">🎙️</span>
+              <span>Ghi âm chất lượng cao</span>
+            </div>
+            <div class="auth-page__feature">
+              <span class="auth-page__feature-icon">📝</span>
+              <span>Phiên âm tự động</span>
+            </div>
+            <div class="auth-page__feature">
+              <span class="auth-page__feature-icon">🤖</span>
+              <span>AI tóm tắt & phân tích</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    this._bindEvents();
+  }
+
+  _getLoginHTML() {
+    return `
+      <div class="auth-field">
+        <label class="auth-field__label">Tên tài khoản hoặc Email</label>
+        <div class="auth-field__input-wrap">
+          <span class="auth-field__icon">👤</span>
+          <input type="text" id="authLoginUsername" class="auth-field__input" placeholder="username hoặc email" autocomplete="username" />
+        </div>
+      </div>
+      <div class="auth-field">
+        <label class="auth-field__label">Mật khẩu</label>
+        <div class="auth-field__input-wrap">
+          <span class="auth-field__icon">🔒</span>
+          <input type="password" id="authLoginPassword" class="auth-field__input" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+      </div>
+    `;
+  }
+
+  _getRegisterHTML() {
+    return `
+      <div class="auth-field">
+        <label class="auth-field__label">Tên hiển thị</label>
+        <div class="auth-field__input-wrap">
+          <span class="auth-field__icon">😊</span>
+          <input type="text" id="authRegName" class="auth-field__input" placeholder="Ví dụ: Nguyễn Văn A" />
+        </div>
+      </div>
+      <div class="auth-field">
+        <label class="auth-field__label">Tên tài khoản (username)</label>
+        <div class="auth-field__input-wrap">
+          <span class="auth-field__icon">👤</span>
+          <input type="text" id="authRegUsername" class="auth-field__input" placeholder="viet_tat_khong_dau" autocomplete="username" />
+        </div>
+      </div>
+      <div class="auth-field">
+        <label class="auth-field__label">Email</label>
+        <div class="auth-field__input-wrap">
+          <span class="auth-field__icon">📧</span>
+          <input type="email" id="authRegEmail" class="auth-field__input" placeholder="name@domain.com" />
+        </div>
+      </div>
+      <div class="auth-field">
+        <label class="auth-field__label">Mật khẩu</label>
+        <div class="auth-field__input-wrap">
+          <span class="auth-field__icon">🔒</span>
+          <input type="password" id="authRegPassword" class="auth-field__input" placeholder="Tối thiểu 6 ký tự" autocomplete="new-password" />
+        </div>
+      </div>
+      <div class="auth-field">
+        <label class="auth-field__label">Xác nhận mật khẩu</label>
+        <div class="auth-field__input-wrap">
+          <span class="auth-field__icon">🔒</span>
+          <input type="password" id="authRegConfirm" class="auth-field__input" placeholder="Nhập lại mật khẩu" autocomplete="new-password" />
+        </div>
+      </div>
+    `;
+  }
+
+  _bindEvents() {
+    // Tab switching
+    const loginTab = this.container.querySelector('#authTabLogin');
+    const registerTab = this.container.querySelector('#authTabRegister');
+    const switchToRegister = this.container.querySelector('#authSwitchToRegister');
+    const switchToLogin = this.container.querySelector('#authSwitchToLogin');
+
+    loginTab?.addEventListener('click', () => { this._activeTab = 'login'; this.render(); });
+    registerTab?.addEventListener('click', () => { this._activeTab = 'register'; this.render(); });
+    switchToRegister?.addEventListener('click', () => { this._activeTab = 'register'; this.render(); });
+    switchToLogin?.addEventListener('click', () => { this._activeTab = 'login'; this.render(); });
+
+    // Submit
+    this.container.querySelector('#authPageSubmit')?.addEventListener('click', () => {
+      if (this._activeTab === 'login') this._handleLogin();
+      else this._handleRegister();
+    });
+
+    // Enter key
+    this.container.querySelectorAll('.auth-field__input').forEach(input => {
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          if (this._activeTab === 'login') this._handleLogin();
+          else this._handleRegister();
+        }
+      });
+    });
+
+    // Focus first input
+    setTimeout(() => {
+      const firstInput = this.container.querySelector('.auth-field__input');
+      firstInput?.focus();
+    }, 400);
+  }
+
+  _showError(msg) {
+    const el = this.container.querySelector('#authPageError');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    el.classList.add('shake');
+    setTimeout(() => el.classList.remove('shake'), 500);
+  }
+
+  _hideError() {
+    const el = this.container.querySelector('#authPageError');
+    if (el) el.classList.add('hidden');
+  }
+
+  _setLoading(loading) {
+    const btn = this.container.querySelector('#authPageSubmit');
+    if (!btn) return;
+    btn.disabled = loading;
+    const textEl = btn.querySelector('.auth-card__submit-text');
+    const iconEl = btn.querySelector('.auth-card__submit-icon');
+    if (loading) {
+      textEl.textContent = 'Đang xử lý...';
+      iconEl.innerHTML = '<span class="auth-spinner"></span>';
+    } else {
+      textEl.textContent = this._activeTab === 'login' ? 'Đăng nhập' : 'Tạo tài khoản';
+      iconEl.textContent = '→';
+    }
+  }
+
+  async _handleLogin() {
+    this._hideError();
+    const username = this.container.querySelector('#authLoginUsername')?.value.trim();
+    const password = this.container.querySelector('#authLoginPassword')?.value;
+
+    if (!username || !password) {
+      this._showError('Vui lòng điền đầy đủ thông tin.');
+      return;
+    }
+
+    try {
+      this._setLoading(true);
+      await storage.login(username, password);
+      showToast('Đăng nhập thành công! 🎉', 'success');
+      EventBus.emit('authStateChanged', { loggedIn: true });
+    } catch (err) {
+      this._showError(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại.');
+    } finally {
+      this._setLoading(false);
+    }
+  }
+
+  async _handleRegister() {
+    this._hideError();
+    const name = this.container.querySelector('#authRegName')?.value.trim();
+    const username = this.container.querySelector('#authRegUsername')?.value.trim();
+    const email = this.container.querySelector('#authRegEmail')?.value.trim();
+    const password = this.container.querySelector('#authRegPassword')?.value;
+    const confirm = this.container.querySelector('#authRegConfirm')?.value;
+
+    if (!username || !email || !password || !confirm) {
+      this._showError('Vui lòng điền đầy đủ các thông tin bắt buộc.');
+      return;
+    }
+    if (password.length < 6) {
+      this._showError('Mật khẩu phải tối thiểu 6 ký tự.');
+      return;
+    }
+    if (password !== confirm) {
+      this._showError('Mật khẩu nhập lại không khớp.');
+      return;
+    }
+
+    try {
+      this._setLoading(true);
+      await storage.register(email, username, password, name);
+      showToast('Đăng ký thành công! Chào mừng bạn 🎉', 'success');
+      EventBus.emit('authStateChanged', { loggedIn: true });
+    } catch (err) {
+      this._showError(err.message || 'Đăng ký tài khoản thất bại.');
+    } finally {
+      this._setLoading(false);
+    }
+  }
+}
+
+
+// ── Profile Modal (for logged-in users) ──────────────────
 class AuthModal {
   constructor() {
     this._modal = null;
-    this._activeTab = 'login'; // 'login' or 'register'
     this._isEditingProfile = false;
     this._build();
   }
@@ -31,7 +303,7 @@ class AuthModal {
   }
 
   open() {
-    this._renderContent();
+    this._renderProfile();
     this._modal.classList.add('visible');
     document.body.style.overflow = 'hidden';
   }
@@ -39,114 +311,6 @@ class AuthModal {
   close() {
     this._modal.classList.remove('visible');
     document.body.style.overflow = '';
-  }
-
-  _renderContent() {
-    const token = storage.getToken();
-    if (token) {
-      this._renderProfile();
-    } else {
-      this._renderAuthForms();
-    }
-  }
-
-  // ── Render Login/Register Forms ───────────────────────
-  _renderAuthForms() {
-    const isLogin = this._activeTab === 'login';
-    
-    this._modal.innerHTML = `
-      <div class="modal__content" style="border-radius:var(--radius-2xl); width:90%; max-width:420px; display:flex; flex-direction:column; background: linear-gradient(180deg, #1e1e2f 0%, #121220 100%);">
-        
-        <!-- Header Tabs -->
-        <div class="auth-tabs">
-          <button class="auth-tab-btn ${isLogin ? 'active' : ''}" id="tabLoginBtn">Đăng nhập</button>
-          <button class="auth-tab-btn ${!isLogin ? 'active' : ''}" id="tabRegisterBtn">Đăng ký</button>
-        </div>
-
-        <div style="padding: 0 var(--space-5) var(--space-6); display:flex; flex-direction:column; gap:var(--space-4);">
-          
-          <div id="authErrorMessage" class="hidden" style="font-size:var(--text-xs); color:var(--color-red); padding:var(--space-2) var(--space-3); background:rgba(255, 77, 77, 0.1); border:1px solid rgba(255, 77, 77, 0.2); border-radius:var(--radius-sm); line-height:1.4;"></div>
-
-          ${isLogin ? this._getLoginHTML() : this._getRegisterHTML()}
-
-          <button class="btn btn--primary" id="authSubmitBtn" style="width:100%; font-size:var(--text-sm); font-weight:var(--weight-semibold); padding:var(--space-3); border-radius:var(--radius-md); margin-top:var(--space-2);">
-            ${isLogin ? 'Đăng nhập' : 'Tạo tài khoản'}
-          </button>
-        </div>
-      </div>
-    `;
-
-    // Hook events
-    this._modal.querySelector('#tabLoginBtn').addEventListener('click', () => {
-      this._activeTab = 'login';
-      this._renderAuthForms();
-    });
-
-    this._modal.querySelector('#tabRegisterBtn').addEventListener('click', () => {
-      this._activeTab = 'register';
-      this._renderAuthForms();
-    });
-
-    this._modal.querySelector('#authSubmitBtn').addEventListener('click', () => {
-      if (isLogin) {
-        this._handleLogin();
-      } else {
-        this._handleRegister();
-      }
-    });
-
-    // Enter key support
-    const inputs = this._modal.querySelectorAll('.input-field');
-    inputs.forEach(input => {
-      input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          if (isLogin) this._handleLogin();
-          else this._handleRegister();
-        }
-      });
-    });
-  }
-
-  _getLoginHTML() {
-    return `
-      <div style="display:flex; flex-direction:column; gap:var(--space-3);">
-        <div style="display:flex; flex-direction:column; gap:var(--space-1);">
-          <label style="font-size:var(--text-xs); color:var(--text-secondary);">Tên tài khoản hoặc Email</label>
-          <input type="text" id="loginUsername" class="input-field" placeholder="username hoặc email" autocomplete="username" />
-        </div>
-        <div style="display:flex; flex-direction:column; gap:var(--space-1);">
-          <label style="font-size:var(--text-xs); color:var(--text-secondary);">Mật khẩu</label>
-          <input type="password" id="loginPassword" class="input-field" placeholder="••••••••" autocomplete="current-password" />
-        </div>
-      </div>
-    `;
-  }
-
-  _getRegisterHTML() {
-    return `
-      <div style="display:flex; flex-direction:column; gap:var(--space-3); max-height: 48vh; overflow-y: auto; padding-right: 4px;">
-        <div style="display:flex; flex-direction:column; gap:var(--space-1);">
-          <label style="font-size:var(--text-xs); color:var(--text-secondary);">Tên hiển thị</label>
-          <input type="text" id="regName" class="input-field" placeholder="Ví dụ: Nguyễn Văn A" />
-        </div>
-        <div style="display:flex; flex-direction:column; gap:var(--space-1);">
-          <label style="font-size:var(--text-xs); color:var(--text-secondary);">Tên tài khoản (username)</label>
-          <input type="text" id="regUsername" class="input-field" placeholder="viet_tat_khong_dau" autocomplete="username" />
-        </div>
-        <div style="display:flex; flex-direction:column; gap:var(--space-1);">
-          <label style="font-size:var(--text-xs); color:var(--text-secondary);">Email</label>
-          <input type="email" id="regEmail" class="input-field" placeholder="name@domain.com" />
-        </div>
-        <div style="display:flex; flex-direction:column; gap:var(--space-1);">
-          <label style="font-size:var(--text-xs); color:var(--text-secondary);">Mật khẩu</label>
-          <input type="password" id="regPassword" class="input-field" placeholder="Tối thiểu 6 ký tự" autocomplete="new-password" />
-        </div>
-        <div style="display:flex; flex-direction:column; gap:var(--space-1);">
-          <label style="font-size:var(--text-xs); color:var(--text-secondary);">Xác nhận mật khẩu</label>
-          <input type="password" id="regConfirmPassword" class="input-field" placeholder="Nhập lại mật khẩu" autocomplete="new-password" />
-        </div>
-      </div>
-    `;
   }
 
   // ── Render User Profile ───────────────────────────────
@@ -289,85 +453,13 @@ class AuthModal {
     }
   }
 
-  // ── Authentication Actions ───────────────────────────
-  async _handleLogin() {
-    const errorEl = this._modal.querySelector('#authErrorMessage');
-    errorEl.classList.add('hidden');
-
-    const usernameOrEmail = this._modal.querySelector('#loginUsername').value.trim();
-    const password = this._modal.querySelector('#loginPassword').value;
-
-    if (!usernameOrEmail || !password) {
-      errorEl.textContent = 'Vui lòng điền đầy đủ thông tin.';
-      errorEl.classList.remove('hidden');
-      return;
-    }
-
-    try {
-      this._setLoadingState(true);
-      await storage.login(usernameOrEmail, password);
-      showToast('Đăng nhập thành công!', 'success');
-      this._isEditingProfile = false;
-      this._renderContent();
-      EventBus.emit('accountUpdated');
-    } catch (err) {
-      errorEl.textContent = err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại.';
-      errorEl.classList.remove('hidden');
-    } finally {
-      this._setLoadingState(false);
-    }
-  }
-
-  async _handleRegister() {
-    const errorEl = this._modal.querySelector('#authErrorMessage');
-    errorEl.classList.add('hidden');
-
-    const name = this._modal.querySelector('#regName').value.trim();
-    const username = this._modal.querySelector('#regUsername').value.trim();
-    const email = this._modal.querySelector('#regEmail').value.trim();
-    const password = this._modal.querySelector('#regPassword').value;
-    const confirmPassword = this._modal.querySelector('#regConfirmPassword').value;
-
-    if (!username || !email || !password || !confirmPassword) {
-      errorEl.textContent = 'Vui lòng điền đầy đủ các thông tin bắt buộc.';
-      errorEl.classList.remove('hidden');
-      return;
-    }
-
-    if (password.length < 6) {
-      errorEl.textContent = 'Mật khẩu phải tối thiểu 6 ký tự.';
-      errorEl.classList.remove('hidden');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      errorEl.textContent = 'Mật khẩu nhập lại không khớp.';
-      errorEl.classList.remove('hidden');
-      return;
-    }
-
-    try {
-      this._setLoadingState(true);
-      await storage.register(email, username, password, name);
-      showToast('Đăng ký thành công và tự động đăng nhập!', 'success');
-      this._isEditingProfile = false;
-      this._renderContent();
-      EventBus.emit('accountUpdated');
-    } catch (err) {
-      errorEl.textContent = err.message || 'Đăng ký tài khoản thất bại.';
-      errorEl.classList.remove('hidden');
-    } finally {
-      this._setLoadingState(false);
-    }
-  }
-
   _handleLogout() {
-    if (confirm('Bạn có chắc chắn muốn đăng xuất? Dữ liệu ghi âm mới sẽ chỉ được lưu trong trình duyệt cho đến khi bạn đăng nhập lại.')) {
+    if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
       storage.logout();
       showToast('Đã đăng xuất!', 'default');
       this._isEditingProfile = false;
-      this._renderContent();
-      EventBus.emit('accountUpdated');
+      this.close();
+      EventBus.emit('authStateChanged', { loggedIn: false });
     }
   }
 
@@ -403,19 +495,6 @@ class AuthModal {
       
       this._modal.querySelector('#profileActionBtn').textContent = 'Lưu';
       this._modal.querySelector('#profileActionBtn').disabled = false;
-    }
-  }
-
-  _setLoadingState(loading) {
-    const btn = this._modal.querySelector('#authSubmitBtn');
-    if (!btn) return;
-
-    if (loading) {
-      btn.disabled = true;
-      btn.textContent = 'Vui lòng đợi...';
-    } else {
-      btn.disabled = false;
-      btn.textContent = this._activeTab === 'login' ? 'Đăng nhập' : 'Tạo tài khoản';
     }
   }
 }
